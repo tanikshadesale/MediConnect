@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Health Chatbot</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #e0f7fa;
+      padding: 30px;
+      text-align: center;
+    }
+    .chatbox {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      width: 80%;
+    }
+    .response {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #00695c;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chatbox">
+    <h2>🩺 Health Chatbot</h2>
+    <input type="text" id="userInput" placeholder="Ask your health question..." />
+    <br>
+    <button onclick="getResponse()">Ask</button>
+    <button onclick="startVoice()">🎤 Speak</button>
+    <div class="response" id="botResponse"></div>
+  </div>
+
+  <script>
+    const qaPairs = [
+  { question: "What are the symptoms of fever?", answer: "Common symptoms include high temperature, chills, and sweating." },
+  { question: "How to treat a headache?", answer: "Rest, hydration, and over-the-counter pain relievers can help alleviate headaches." },
+  { question: "Is the common cold contagious?", answer: "Yes, the common cold is contagious and spreads through droplets." },
+  { question: "What causes a sore throat?", answer: "Viral infections, bacterial infections, or environmental factors like dry air can cause sore throats." },
+  { question: "How can I prevent the flu?", answer: "Annual flu vaccinations, regular handwashing, and avoiding close contact with sick individuals can help prevent the flu." },
+  { question: "What are the signs of dehydration?", answer: "Symptoms include dry mouth, dark urine, fatigue, and dizziness." },
+  { question: "How much water should I drink daily?", answer: "It's generally recommended to drink about 8 glasses (2 liters) of water per day, but individual needs may vary." },
+  { question: "What is a balanced diet?", answer: "A balanced diet includes a variety of fruits, vegetables, whole grains, lean proteins, and healthy fats." },
+  { question: "How often should I exercise?", answer: "Aim for at least 150 minutes of moderate aerobic activity or 75 minutes of vigorous activity per week." },
+  { question: "What are the benefits of regular exercise?", answer: "Regular exercise improves cardiovascular health, strengthens muscles, boosts mood, and aids in weight management." },
+  { question: "What is high blood pressure?", answer: "High blood pressure, or hypertension, is when the force of blood against artery walls is consistently too high." },
+  { question: "How can I lower my blood pressure?", answer: "Lifestyle changes like reducing salt intake, exercising regularly, and managing stress can help lower blood pressure." },
+  { question: "What are the symptoms of diabetes?", answer: "Common symptoms include increased thirst, frequent urination, fatigue, and blurred vision." },
+  { question: "How is diabetes managed?", answer: "Management includes monitoring blood sugar levels, following a healthy diet, exercising, and possibly taking medication." },
+  { question: "What is cholesterol?", answer: "Cholesterol is a fatty substance in the blood; high levels can increase the risk of heart disease." },
+  { question: "How can I reduce my cholesterol levels?", answer: "Eating a heart-healthy diet, exercising, and avoiding tobacco smoke can help lower cholesterol." },
+  { question: "What causes heart disease?", answer: "Factors include high blood pressure, high cholesterol, smoking, obesity, and lack of physical activity." },
+  { question: "What are the symptoms of a heart attack?", answer: "Symptoms include chest pain, shortness of breath, nausea, and lightheadedness." },
+  { question: "How can I improve my mental health?", answer: "Practicing mindfulness, staying connected with others, and seeking professional help when needed can improve mental health." },
+  { question: "What are common signs of depression?", answer: "Signs include persistent sadness, loss of interest in activities, changes in appetite, and difficulty sleeping." },
+  { question: "How is depression treated?", answer: "Treatment options include therapy, medication, lifestyle changes, or a combination of these." },
+  { question: "What is anxiety?", answer: "Anxiety is a feeling of worry or fear that can be mild or severe, often related to stress." },
+  { question: "How can I manage anxiety?", answer: "Techniques include deep breathing, regular exercise, adequate sleep, and talking to a therapist." },
+  { question: "What is a panic attack?", answer: "A panic attack is a sudden episode of intense fear with physical symptoms like rapid heartbeat and shortness of breath." },
+  { question: "How do I know if I have an allergy?", answer: "Symptoms like sneezing, itching, rashes, or swelling after exposure to certain substances may indicate an allergy." },
+  { question: "What are common allergens?", answer: "Common allergens include pollen, dust mites, pet dander, certain foods, and insect stings." },
+  { question: "How are allergies treated?", answer: "Treatments include avoiding allergens, taking antihistamines, and in some cases, immunotherapy." },
+  { question: "What is asthma?", answer: "Asthma is a condition where airways narrow and swell, causing breathing difficulties." },
+  { question: "What triggers asthma attacks?", answer: "Triggers include allergens, cold air, exercise, and respiratory infections." },
+  { question: "How is asthma managed?", answer: "Management includes using inhalers, avoiding triggers, and following a treatment plan prescribed by a doctor." },
+  { question: "What is a healthy body mass index (BMI)?", answer: "A BMI between 18.5 and 24.9 is considered healthy for most adults." },
+  { question: "How can I lose weight safely?", answer: "Combining a balanced diet with regular physical activity and setting realistic goals can lead to safe weight loss." },
+  { question: "What are the risks of obesity?", answer: "Obesity increases the risk of heart disease, diabetes, certain cancers, and joint problems." },
+  { question: "What is insomnia?", answer: "Insomnia is difficulty falling or staying asleep, leading to daytime fatigue." },
+  { question: "How can I improve my sleep quality?", answer: "Maintaining a regular sleep schedule, creating a restful environment, and limiting screen time before bed can help." },
+  { question: "What are the symptoms of the flu?", answer: "Common symptoms include fever, chills, muscle aches, cough, congestion, runny nose, headaches, and fatigue." },
+  { question: "How can I prevent catching a cold?", answer: "Regular handwashing, avoiding close contact with sick individuals, and maintaining a healthy immune system can help prevent colds." },
+  { question: "What should I do if I have a sore throat?", answer: "Gargling with warm salt water, staying hydrated, and using throat lozenges can alleviate symptoms. Consult a doctor if it persists." },
+  { question: "Are headaches a sign of something serious?", answer: "Occasional headaches are common, but frequent or severe headaches may require medical evaluation." },
+  { question: "How do I know if I have a fever?", answer: "A body temperature above 100.4°F (38°C) is generally considered a fever." },
+  { question: "What are signs of anxiety?", answer: "Symptoms include excessive worry, restlessness, fatigue, difficulty concentrating, and sleep disturbances." },
+  { question: "How can I manage stress effectively?", answer: "Techniques include regular exercise, deep breathing, meditation, and maintaining a balanced lifestyle." },
+  { question: "When should I seek help for depression?", answer: "If feelings of sadness persist for more than two weeks or interfere with daily life, consult a mental health professional." },
+  { question: "Can lack of sleep affect my mental health?", answer: "Yes, insufficient sleep can contribute to mood swings, anxiety, and depression." },
+  { question: "Hello", answer: "Hello! I'm your Health Assistant. How can I help you today?" },
+  { question: "Bye", answer: "Take care! Remember, this is not a substitute for professional medical advice." }
+];
+
+
+    function getResponse() {
+      const input = document.getElementById("userInput").value.toLowerCase();
+      const match = qaPairs.find(pair => pair.question.toLowerCase().includes(input));
+      const response = match ? match.answer : "I'm sorry, I don't have information on that topic.";
+      document.getElementById("botResponse").innerText = response;
+      speak(response);
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      speechSynthesis.speak(utterance);
+    }
+
+    function startVoice() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("userInput").value = transcript;
+        getResponse();
+      };
+
+      recognition.onerror = function() {
+        speak("Sorry, I didn't catch that. Try again.");
+      };
+    }
+  </script>
+
+</body>
+</html>
